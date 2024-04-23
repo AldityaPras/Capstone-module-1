@@ -21,19 +21,15 @@ chem_list = [
 
 nondg_storage = 3500
 dg_storage = 3000
-
+cart = []
 
 header = ['No', 'Product Name', 'HS Code', 'Dangerous Good', 'KG per Bag',
           'Bag Quantity', 'Price/KG', 'Entry Date', 'Expiry Date']
 
-
+cart_header = ['No', 'Customer Name', 'Product Name', 'Total Price', 'Out Date']
 
 chem_list2 = [[i + 1, item['product'], item['hs'], item['dg'], item['kg/bag'], item['qty'],
               item['price/kg'], item['in'], item['exp']] for i, item in enumerate(chem_list)]
-
-
-
-# cart2 = [[i + 1, item['name'], item['product'], item['sum_price'], item['out']] for i, item in enumerate(cart)]
 
 def display_chem():
     print(tabulate(chem_list2, headers=header, tablefmt="pretty"))
@@ -53,7 +49,6 @@ Input index: '''))
             break
         else:
             print('Invalid input! Please try again.')
-
 
 def search_chemical():
     while True:
@@ -94,7 +89,6 @@ Input index: '''))
         else:
             print('Invalid input! Please try again.')
 
-
 def sort_chemical():
     while True:
         sort_by = int(input('''\nSort by:
@@ -116,7 +110,6 @@ Input index: '''))
             break
         else:
             print('Please give a correct input!')
-
 
 def add_chem():
     while True:
@@ -183,11 +176,8 @@ def add_chem():
             chem_list2.append([len(chem_list), new_product, int(new_hs), new_dg, int(new_kgbag), int(new_qty),
                                int(new_pricekg), new_in_date, new_exp_date])
             print('New product added successfully!')
-        
-        print(tabulate(cart2, headers = header, tablefmt= 'pretty'))
 
         break
-
 
 def update_chem():
     while True:
@@ -320,7 +310,6 @@ def update_chem():
         else:
             print('Invalid input! Please try again.')
 
-
 def delete_chem():
     print(tabulate(chem_list2, headers=header, tablefmt="pretty"))
     while True:
@@ -350,56 +339,49 @@ def delete_chem():
         else:
             print('Invalid input! Please try again.')
 
-# Global variables
-cart_header = ['Customer Name' 'Product Name', 'Total Price', 'Out Date']
-cart = [{'name' : None,'product' : None, 'sum_price' : None, 'out' : None}]
-
-
 def allocation_chem():
-    cart_header = ['No', 'Customer Name' 'Product Name', 'Total Price', 'Out Date']
-    cart2 = [[i + 1, item['name'], item['product'], item['sum_price'], item['out']] for i, item in enumerate(cart)]
-    print(tabulate(cart2, headers=cart_header, tablefmt='pretty'))
     customer_name = input('Customer name: ')
-
     while True:
         print(tabulate(chem_list2, headers=header, tablefmt="pretty"))
-        customer_chem = int(input('Please input the index of the chemical: '))
-        if 0 < customer_chem <= len(chem_list):
-            customer_chem -= 1
-            item_details = chem_list2[customer_chem]
-            print(tabulate([item_details], headers=header, tablefmt="pretty"))
-            customer_out = input('Date when the chemical is going out (YYYY-MM-DD): ')
-            try:
-                customer_out_date = datetime.datetime.strptime(customer_out, '%Y-%m-%d').date()
-                if customer_out_date < chem_list[customer_chem]['exp']:
-                    customer_qty = int(input('Quantity of the chemical going out: '))
-                    if 0 < customer_qty <= chem_list[customer_chem]['qty']:
-                        new_cart_item = {
-                            'name': customer_name,
-                            'product': chem_list[customer_chem]['product'],
-                            'sum_price': customer_qty * chem_list[customer_chem]['kg/bag'] * chem_list[customer_chem]['price/kg'],
-                            'out': customer_out_date
-                        }
-                        item_exists = False
-                        for item in cart:
-                            if item['product'] == new_cart_item['product'] and item['out'] == new_cart_item['out']:
-                                item['sum_price'] += new_cart_item['sum_price']
-                                item_exists = True
-                                break
-                        if not item_exists:
-                            cart.append(new_cart_item)
-                        print('The item has been successfully added to the cart.')
-                        break
+        customer_chem = input('Please input the index of the chemical: ')
+        if customer_chem.isdigit():
+            customer_chem = int(customer_chem)
+            if 1 <= customer_chem <= len(chem_list):
+                customer_chem -= 1
+                print(tabulate([chem_list2[customer_chem]], headers=header, tablefmt="pretty"))
+                customer_out = input('Date of the chemical going out (YYYY-MM-DD): ')
+                try:
+                    customer_out_date = datetime.datetime.strptime(customer_out, '%Y-%m-%d').date()
+                    if customer_out_date < chem_list[customer_chem]['exp']:
+                        customer_qty = input('How many quantity is going out: ')
+                        if customer_qty.isdigit() and 0 < int(customer_qty) <= chem_list[customer_chem]['qty']:
+                            customer_qty = int(customer_qty)
+                            chem_list[customer_chem]['qty'] -= customer_qty
+                            new_cart = {'name': customer_name,
+                                        'product': chem_list[customer_chem]['product'],
+                                        'sum_price': customer_qty * chem_list[customer_chem]['kg/bag'] * chem_list[customer_chem]['price/kg'],
+                                        'out': customer_out_date}
+                            cart.append(new_cart)
+                            print('The item is successfully added to the cart.')
+                        else:
+                            print('The quantity is outside of the range.')
                     else:
-                        print('The quantity is out of range.')
-                else:
-                    print('The out date is later than the expiry date.')
-            except ValueError:
-                print('Invalid date format! Please enter in the format YYYY-MM-DD.')
+                        print('The out date is after the expiry date. Please choose a different date.')
+                except ValueError:
+                    print('Invalid date format! Please enter in the format YYYY-MM-DD.')
+            else:
+                print('Invalid index! Please try again.')
         else:
-            print('Invalid index! Please try again.')
-    cart2 = [[i + 1, item['name'], item['product'], item['sum_price'], item['out']] for i, item in enumerate(cart)]
-
+            print('Invalid input! Please try again.')
+        
+        display_cart = input('Do you want to display the cart? (yes/no): ').lower()
+        if display_cart == 'yes':
+            cart2 = [[i + 1, item['name'], item['product'], item['sum_price'], item['out']] for i, item in enumerate(cart)]
+            print(tabulate(cart2, headers=cart_header, tablefmt="pretty"))
+        
+        continue_or_not = input('Do you want to continue allocating chemicals? (yes/no): ').lower()
+        if continue_or_not == 'no':
+            break
 
 def main_menu():
     while True:
@@ -411,7 +393,6 @@ def main_menu():
 5. Allocation Chemical
 6. Exit
 \nPlease insert index menu: '''))
-
         if menu == 1:
             display_chem()
         elif menu == 2:
@@ -427,6 +408,5 @@ def main_menu():
             break
         else:
             print('Invalid input! Please try again.')
-
 
 main_menu()
