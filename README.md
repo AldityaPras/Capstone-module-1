@@ -21,4 +21,4 @@ This is a simple command-line warehouse management system built in Python. It al
 
 1. Clone the repository:
    ```bash
-[   git clone https://github.com/your-username/warehouse-management-system.git](https://github.com/AldityaPras/Capstone-module-1.git)
+   git clone https://github.com/your-username/warehouse-management-system.git](https://github.com/AldityaPras/Capstone-module-1.git
